@@ -5,15 +5,12 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-
+#define CLIENT_IP "192.168.43.219"
 #define PORT 8888
-#define BUF_SIZE 1024
 
 int main() {
      FILE *file;
-    
-    char buffer2[BUF_SIZE];
-    file = fopen("Scorpions - Wind Of Change.mp3", "rb");
+    file = fopen("AC⧸DC - Back In Black.wav", "rb");
 
     if (file == NULL) {
         fprintf(stderr, "Ошибка открытия файла\n");
@@ -21,10 +18,12 @@ int main() {
     }
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
-    char buffer[file_size];
     printf("File size: %ld\n", file_size);
+    //short buffer;
+    short *buffer = (short*)malloc(44);
+    //printf("123");
     rewind(file);
-    fread(buffer, 1, file_size, file);
+    fread(&buffer, sizeof(short), 1, file);
     fclose(file);
 
     int server_socket, client_socket, addr_len, recv_len;
@@ -35,7 +34,8 @@ int main() {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
-
+    client_addr.sin_addr.s_addr = inet_addr(CLIENT_IP);
+    client_addr.sin_port = htons(PORT);
     // Настройка адреса сервера
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
@@ -50,26 +50,15 @@ int main() {
     addr_len = sizeof(client_addr);
     printf("Waiting...\n");
     // Принятие данных от клиента и вывод их на stdout
-    while (1) {
-        recv_len = read(server_socket, buffer2, sizeof(buffer2));
-        int flag = 1;
-        if (recv_len == -1) {
-            perror("Receive error");
-            exit(EXIT_FAILURE);
-        }
-        else if (recv_len == 0){
-            break;
-        }
-        
-        printf("Received message from client: %s\n", buffer);
-        
-    }
-        recv_len = write(server_socket, buffer, sizeof(buffer));
+    int i = 0;
+    while(1){
+        recv_len = sendto(server_socket, buffer, 1024, 0, client_addr.sin_addr.s_addr, sizeof client_addr);
             if (recv_len == -1) {
             perror("Write error");
             exit(EXIT_FAILURE);
         }
-
+        i++;
+    }
     close(server_socket);
 
     return 0;
