@@ -5,9 +5,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #define CLIENT_IP "192.168.1.82"
 #define PORT 8888
-
+#define BUF_SIZE 1024
 char buf3 [256];
 int main() {
      FILE *file;
@@ -20,11 +21,10 @@ int main() {
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
     printf("File size: %ld\n", file_size);
-    //short buffer;
-    short *buffer = (short*)malloc(44);
+    char buffer [BUF_SIZE] = {0};
     //printf("123");
     rewind(file);
-    fread(&buffer, sizeof(short), 1, file);
+    fread(buffer, sizeof(short), 1024, file);
     fclose(file);
 
     int server_socket, client_socket, addr_len, recv_len, snd_len;
@@ -42,6 +42,11 @@ int main() {
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     server_addr.sin_port = htons(PORT);
 
+/*
+    client_addr.sin_family = AF_INET;
+    client_addr.sin_addr.s_addr = inet_aton("0.0.0.0");
+    client_addr.sin_port = htons(PORT);
+    */
     // Связывание сокета с адресом сервера
     if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
         perror("Bind failed");
@@ -70,7 +75,7 @@ int main() {
     }
     while(1){
 
-        snd_len = sendto(server_socket, buffer, sizeof(buffer), 0,  (struct sockaddr *)&client_addr, sizeof(client_addr));
+        snd_len = sendto(server_socket,  buffer, sizeof(buffer), 0,  (struct sockaddr *)&client_addr, sizeof(client_addr));
             if (snd_len == -1) {
             perror("Write error");
             exit(EXIT_FAILURE);
