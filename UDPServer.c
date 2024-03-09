@@ -10,6 +10,7 @@
 #define PORT 8888
 #define BUF_SIZE 1024
 char buf3 [256];
+char buffer2;
 int main() {
      FILE *file;
     file = fopen("AC⧸DC - Back In Black.wav", "rb");
@@ -80,15 +81,20 @@ int main() {
     
     //printf("client addr: %d\n", client_addr);
     //printf("addrlen: %d\n", addr_len);
-    while(1){
-
-        snd_len = sendto(server_socket,  buffer, sizeof(buffer), 0,  (struct sockaddr *)&client_addr, addr_len);
+while(1){
+   // printf("123\n");
+        //snd_len = sendto(server_socket,  buffer, sizeof(buffer), 0,  (struct sockaddr *)&client_addr, addr_len);
+       // printf("ok\n");
+       buffer2 = buffer[i];
+       write(server_socket, &buffer2, 1);
             if (snd_len == -1) {
+               // printf("13223\n");
             perror("Write error");
             exit(EXIT_FAILURE);
         }
         i++;
-    }
+}
+        //printf("ok123\n");
     close(server_socket);
 
     return 0;
