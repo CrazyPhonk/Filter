@@ -73,9 +73,16 @@ int main() {
     }
     if (flag >0) break;
     }
+
+    client_addr.sin_family = AF_INET;
+    client_addr.sin_port = htons(PORT);
+    inet_pton(AF_INET, CLIENT_IP, &client_addr.sin_addr);
+    
+    //printf("client addr: %d\n", client_addr);
+    //printf("addrlen: %d\n", addr_len);
     while(1){
 
-        snd_len = sendto(server_socket,  buffer, sizeof(buffer), 0,  (struct sockaddr *)&client_addr, sizeof(client_addr));
+        snd_len = sendto(server_socket,  buffer, sizeof(buffer), 0,  (struct sockaddr *)&client_addr, addr_len);
             if (snd_len == -1) {
             perror("Write error");
             exit(EXIT_FAILURE);
