@@ -1,11 +1,33 @@
+#include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
-
+#define BUFFER_SIZE 1024
+#define SAMPLE_RATE 10000  // Частота дискретизации
+#define CUT_OFF_FREQ 50    // Частота среза 500
 const int udpPort = 8080;
 WiFiUDP udp;
+int i = 0, j = 0;
+float alpha = 0.0;
+float y_prev = 0.0;
+float x_prev = 0.0;
+char incomingPacket;
+//int buf[BUFFER_SIZE] = {0};
+float x[1] = {0};
+int flag = 0;
+float y;
+int packetSize;
+
+float lowPassFilter(float x) {
+  alpha = CUT_OFF_FREQ / (SAMPLE_RATE + CUT_OFF_FREQ);
+  float y = alpha * x + (1000 - alpha) * y_prev; //1 
+  y_prev = y;
+  x_prev = x;
+  i++;
+  return y;
+}
 
 void setup() {
-  Serial.begin(115200);
+   Serial.begin(115200);
   
   WiFi.begin("ASUS", "9137050077");
 
@@ -23,15 +45,13 @@ void setup() {
 }
 
 void loop() {
-  int packetSize = udp.parsePacket();
   
+  packetSize = udp.parsePacket();
   if (packetSize) {
     Serial.print("Received packet of size ");
     Serial.println(packetSize);
     
-    char incomingPacket[1024];
-    udp.read(incomingPacket, packetSize);
-    
+    udp.read((char *)x, packetSize);
     Serial.print("From ");
     IPAddress remoteIP = udp.remoteIP();
     Serial.print(remoteIP);
@@ -39,8 +59,16 @@ void loop() {
     Serial.println(udp.remotePort());
     
     Serial.print("Message: ");
-    Serial.println(incomingPacket);
-    incomingPacket = 
-    
+    //Serial.print(incomingPacket);
+    Serial.print(x[0]); Serial.print(" ");
+    flag=1;
   }
+  if (flag == 1){
+    y = lowPassFilter(x[0]);
+    Serial.print("y = "); Serial.println(y);
+    flag = 0;
+     delay(1000);
+ }
 }
+
+
