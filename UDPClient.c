@@ -15,8 +15,7 @@ void error(char *msg) {
 }
 
 int main() {
-uint8_t bufToRec[1];
-uint8_t bufToRec2[10000] = {0};
+
 /*
     FILE *file_ptr;
     int sockfd, connfd;
@@ -48,13 +47,8 @@ uint8_t bufToRec2[10000] = {0};
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0) {
         error("Connection failed");
     }
-    //char str[256] = "1233214214";
-   // short buffer[5]= {10000,20000,30000,-32000,30500};
-   // char* symb = (char *)&buffer[0];
     uint8_t buf[40] = {0};
 	int i = 0, l = 0;
-    //fseek(file_ptr, 44, SEEK_SET); // Skip the header of the wav file (44 bytes)
-   // send(sockfd, symb, 10, 0);
 	for(int j = 0 ; j < 40; j++){
 	buf[j] = _002_raw[j];
 	i++;
@@ -64,18 +58,14 @@ uint8_t bufToRec2[10000] = {0};
        // printf("%d ",_002_raw[
 	for(int t = 0; t < 40; t++){
         buf[t] = buf[t+1];
-	}
-	buf[39] = _002_raw[i+1];
-	i++;
+	    }
+	    buf[39] = _002_raw[i+1];
+	    i++;
         send(sockfd, buf, 40, 0);
-	/*recvfrom(sockfd, bufToRec, 1, 0, (struct sockaddr*)&servaddr, (sizeof(servaddr)));
-	bufToRec2[l] = bufToRec[0];
-	printf("%d ", bufToRec2[l]);*/
-	l++;
+	    l++;
+        usleep(800000);
     }
     printf("File sent successfully\n");
     close(sockfd);
-    //fclose(file_ptr);
-
     return 0;
 }
