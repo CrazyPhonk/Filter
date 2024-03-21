@@ -43,7 +43,7 @@ int main() {
     servaddr.sin_addr.s_addr = inet_addr("192.168.1.82"); //203
     servaddr.sin_port = htons(PORT);
 
-    printf("ip:%d\n",servaddr.sin_addr.s_addr);
+    printf("ip:%d\n", servaddr.sin_addr.s_addr);
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0) {
         error("Connection failed");
     }
@@ -53,7 +53,8 @@ int main() {
 	buf[j] = _002_raw[j];
 	i++;
 	}
-	send(sockfd, buf, 40, 0);
+    int len = sizeof(servaddr);
+    sendto(sockfd, buf, 40, 0, (struct sockaddr *)&servaddr, len);
     while (_002_raw[l] != 0) {
        // printf("%d ",_002_raw[
 	for(int t = 0; t < 40; t++){
@@ -61,7 +62,7 @@ int main() {
 	    }
 	    buf[39] = _002_raw[i+1];
 	    i++;
-        send(sockfd, buf, 40, 0);
+        sendto(sockfd, buf, 40, 0, (struct sockaddr *)&servaddr, len);
 	    l++;
         usleep(800000);
     }

@@ -3,23 +3,25 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <sys/socket.h>
-#define PORT 8081
 
+#define PORT 8081
+#define BUF_SIZE 1024
 int main() {
     int sockfd;
-    struct sockaddr_in servaddr;
     uint8_t buffer[2];
     uint16_t buffer2[10000];
-
+    int sockfd;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    char buffer[BUF_SIZE];
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd == -1) {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
-    printf("Socket created\n");
+
     memset(&servaddr, 0, sizeof(servaddr));
-   // memset(&client_addr, 0, sizeof(client_addr));
+    memset(&client_addr, 0, sizeof(client_addr));
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = inet_addr("192.168.1.82");
@@ -32,17 +34,15 @@ int main() {
         perror("connect failed");
         exit(EXIT_FAILURE);
     }
-     printf("Connection Ok\n");
     int i = 0;
     int len = sizeof(servaddr);
     while (1) {
-        memset(buffer, 0, sizeof(buffer));
-        printf("323\n");
-        recvfrom(sockfd, (uint8_t *)buffer, 2, MSG_WAITALL, (struct sockaddr*)&servaddr, &len);
-        //printf("Data received: %hhn", buffer);
-        printf("123\n");
-        buffer2[i] = buffer[1] | (buffer[0] << 8);
-        printf("%x ", buffer2[i]);
+        // Получение данных от клиента
+        int len = recvfrom(sockfd, buffer, BUF_SIZE, 0, (struct sockaddr *)&client_addr, &addr_len);
+        buffer[len] = '0'; // Добавляем символ конца строки
+
+        // Вывод полученных данных
+        printf("Received packet from %s:%d - %sn", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port), buffer);
     }
 
     close(sockfd);
